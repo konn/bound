@@ -32,23 +32,23 @@ module Bound.Var
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative
 #endif
-import Control.Monad (liftM, ap)
+import Control.Monad (ap, liftM)
 #if __GLASGOW_HASKELL__ < 710
 import Data.Foldable
+import Data.Monoid (Monoid (..))
 import Data.Traversable
-import Data.Monoid (Monoid(..))
 #endif
-import Data.Hashable
-import Data.Hashable.Extras
-import Data.Bifunctor
 import Data.Bifoldable
-import qualified Data.Binary as Binary
+import Data.Bifunctor
 import Data.Binary (Binary)
+import qualified Data.Binary as Binary
 import Data.Bitraversable
 import Data.Bytes.Get
 import Data.Bytes.Put
 import Data.Bytes.Serial
 import Data.Functor.Classes
+import Data.Hashable
+import Data.Hashable.Lifted
 #ifdef __GLASGOW_HASKELL__
 import Data.Data
 # if __GLASGOW_HASKELL__ >= 704
@@ -56,8 +56,8 @@ import GHC.Generics
 # endif
 #endif
 import Data.Profunctor
-import qualified Data.Serialize as Serialize
 import Data.Serialize (Serialize)
+import qualified Data.Serialize as Serialize
 #if __GLASGOW_HASKELL__ < 710
 import Data.Word
 #endif
@@ -85,6 +85,7 @@ data Var b a
   , Typeable
 # if __GLASGOW_HASKELL__ >= 704
   , Generic
+  , Generic1
 # endif
 #endif
   )
@@ -92,8 +93,13 @@ data Var b a
 distinguisher :: Int
 distinguisher = fromIntegral $ (maxBound :: Word) `quot` 3
 
-instance Hashable2 Var
+instance Hashable2 Var where
+  liftHashWithSalt2 hl _  s (B b) = hl s b
+  liftHashWithSalt2 _  hr s (F a) =
+    hr s a `hashWithSalt` distinguisher
+
 instance Hashable b => Hashable1 (Var b)
+
 instance (Hashable b, Hashable a) => Hashable (Var b a) where
   hashWithSalt s (B b) = hashWithSalt s b
   hashWithSalt s (F a) = hashWithSalt s a `hashWithSalt` distinguisher

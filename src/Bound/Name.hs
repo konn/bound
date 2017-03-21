@@ -53,10 +53,10 @@ import Data.Foldable
 import Data.Monoid
 import Data.Traversable
 #endif
-import Data.Bifunctor
 import Data.Bifoldable
-import qualified Data.Binary as Binary
+import Data.Bifunctor
 import Data.Binary (Binary)
+import qualified Data.Binary as Binary
 import Data.Bitraversable
 import Data.Bytes.Serial
 import Data.Functor.Classes
@@ -67,10 +67,10 @@ import GHC.Generics
 # endif
 #endif
 import Data.Hashable
-import Data.Hashable.Extras
+import Data.Hashable.Lifted
 import Data.Profunctor
-import qualified Data.Serialize as Serialize
 import Data.Serialize (Serialize)
+import qualified Data.Serialize as Serialize
 
 -------------------------------------------------------------------------------
 -- Names
@@ -118,12 +118,12 @@ instance Eq b => Eq (Name n b) where
   {-# INLINE (==) #-}
 
 instance Hashable2 Name where
-  hashWithSalt2 m (Name _ a) = hashWithSalt m a
-  {-# INLINE hashWithSalt2 #-}
+  liftHashWithSalt2 _ hr m (Name _ a) = hr m a
+  {-# INLINE liftHashWithSalt2 #-}
 
 instance Hashable1 (Name n) where
-  hashWithSalt1 m (Name _ a) = hashWithSalt m a
-  {-# INLINE hashWithSalt1 #-}
+  liftHashWithSalt h m (Name _ a) = h m a
+  {-# INLINE liftHashWithSalt #-}
 
 instance Hashable a => Hashable (Name n a) where
   hashWithSalt m (Name _ a) = hashWithSalt m a

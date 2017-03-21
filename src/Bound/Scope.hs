@@ -82,7 +82,7 @@ import Data.Bytes.Serial
 import Data.Foldable
 import Data.Functor.Classes
 import Data.Hashable
-import Data.Hashable.Extras
+import Data.Hashable.Lifted
 import Data.Monoid
 import qualified Data.Serialize as Serialize
 import Data.Serialize (Serialize)
@@ -221,8 +221,9 @@ instance Bound (Scope b) where
   {-# INLINE (>>>=) #-}
 
 instance (Hashable b, Monad f, Hashable1 f) => Hashable1 (Scope b f) where
-  hashWithSalt1 n m = hashWithSalt1 n (fromScope m)
-  {-# INLINE hashWithSalt1 #-}
+  liftHashWithSalt h n m =
+    liftHashWithSalt (liftHashWithSalt2 hashWithSalt h) n (fromScope m)
+  {-# INLINE liftHashWithSalt #-}
 
 instance (Hashable b, Monad f, Hashable1 f, Hashable a) => Hashable (Scope b f a) where
   hashWithSalt n m = hashWithSalt1 n (fromScope m)
